@@ -1,0 +1,87 @@
+[1mdiff --git a/habit.py b/habit.py[m
+[1mindex c6adf09..6b7048e 100644[m
+[1m--- a/habit.py[m
+[1m+++ b/habit.py[m
+[36m@@ -88,13 +88,25 @@[m [mclass Habit:[m
+         finally:[m
+             cur.close()[m
+ [m
+[31m-    @abstractmethod[m
+     def mark_complete(self, db, mark_date=None):[m
+         """[m
+[31m-        Default implementation for the mark_complete method, so it can be used in the subclasses[m
+[31m-        :return 0 as a default value[m
+[32m+[m[32m        Marks the habit as complete on a specific date.[m
+[32m+[m[32m        :param db: The database connection where the marking of the habit will be stored[m
+[32m+[m[32m        :param mark_date: The date on which to mark the habit as complete (default is today)[m
+         """[m
+[31m-        return 0[m
+[32m+[m[32m        if mark_date is None:[m
+[32m+[m[32m            mark_date = date.today()[m
+[32m+[m[32m        # Calling the subclass-specific part of the logic[m
+[32m+[m[32m        self._mark_complete_specific(db, mark_date)[m
+[32m+[m
+[32m+[m[32m    def _mark_complete_specific(self, db, mark_date):[m
+[32m+[m[32m        """[m
+[32m+[m[32m        Default for the subclass-specific part of marking the habit as complete.[m
+[32m+[m[32m        This method should be overridden by subclasses to implement specific behavior; that's why the underscore.[m
+[32m+[m[32m        :param db: The database connection where the marking of the habit will be stored[m
+[32m+[m[32m        :param mark_date: The date on which to mark the habit as complete[m
+[32m+[m[32m        """[m
+[32m+[m[32m        raise NotImplementedError("Subclasses must override _mark_complete_specific method.")[m
+ [m
+     def calc_individual_stats(self):[m
+         """[m
+[36m@@ -293,14 +305,12 @@[m [mclass DailyHabit(Habit):[m
+     def __init__(self, name="", descr="", gen_date=date.today()):[m
+         super().__init__(name, descr, gen_date, periodicity="Daily")[m
+ [m
+[31m-    def mark_complete(self, db, mark_date=None):[m
+[32m+[m[32m    def _mark_complete_specific(self, db, mark_date):[m
+         """[m
+[31m-        Marks the habit as complete on a specific date.[m
+[31m-        :param db: The database connection where the marking of the habit will be stores[m
+[31m-        :param mark_date: the date on which to mark the habit as complete[m
+[32m+[m[32m        Helps marking the daily habit as complete on a specific date.[m
+[32m+[m[32m        :param db: The database connection where the marking of the habit will be stored[m
+[32m+[m[32m        :param mark_date: The date on which to mark the habit as complete[m
+         """[m
+[31m-        if mark_date is None:[m
+[31m-            mark_date = date.today()[m
+         self.marked_complete.append(mark_date)[m
+         if mark_date != date.today() and mark_date < self.gen_date:[m
+             self.gen_date = mark_date[m
+[36m@@ -405,14 +415,12 @@[m [mclass WeeklyHabit(Habit):[m
+     def __init__(self, name="", descr="", gen_date=date.today()):[m
+         super().__init__(name, descr, gen_date, periodicity="Weekly")[m
+ [m
+[31m-    def mark_complete(self, db, mark_date=None):[m
+[32m+[m[32m    def _mark_complete_specific(self, db, mark_date=None):[m
+         """[m
+[31m-        Marks the habit as complete for the specific week.[m
+[32m+[m[32m        Helps marking the habit as complete for the specific week.[m
+         :param db: The database connection where the marking of the habit will be stores[m
+         :param mark_date: the date on which to mark the habit as complete[m
+         """[m
+[31m-        if mark_date is None:[m
+[31m-            mark_date = date.today()[m
+         # For marking weekly habits complete, we anchor the completion to the first day of the period[m
+         week_start = mark_date - timedelta(days=mark_date.weekday())[m
+         if week_start not in self.marked_complete:[m
+[36m@@ -530,14 +538,12 @@[m [mclass MonthlyHabit(Habit):[m
+     def __init__(self, name="", descr="", gen_date=date.today()):[m
+         super().__init__(name, descr, gen_date, periodicity="Monthly")[m
+ [m
+[31m-    def mark_complete(self, db, mark_date=None):[m
+[32m+[m[32m    def _mark_complete_specific(self, db, mark_date=None):[m
+         """[m
+[31m-        Marks the habit as complete for the month.[m
+[32m+[m[32m        Helps marking the habit as complete for the month.[m
+         :param db: The database connection where the marking of the habit will be stores[m
+         :param mark_date: the date on which to mark the habit as complete[m
+         """[m
+[31m-        if mark_date is None:[m
+[31m-            mark_date = date.today()[m
+         # For marking monthly habits complete, we anchor the completion to the first day of the month.[m
+         month_start = (mark_date.replace(day=1))[m
+         if month_start not in self.marked_complete:[m

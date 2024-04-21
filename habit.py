@@ -88,13 +88,25 @@ class Habit:
         finally:
             cur.close()
 
-    @abstractmethod
     def mark_complete(self, db, mark_date=None):
         """
-        Default implementation for the mark_complete method, so it can be used in the subclasses
-        :return 0 as a default value
+        Marks the habit as complete on a specific date.
+        :param db: The database connection where the marking of the habit will be stored
+        :param mark_date: The date on which to mark the habit as complete (default is today)
         """
-        return 0
+        if mark_date is None:
+            mark_date = date.today()
+        # Calling the subclass-specific part of the logic
+        self._mark_complete_specific(db, mark_date)
+
+    def _mark_complete_specific(self, db, mark_date):
+        """
+        Default for the subclass-specific part of marking the habit as complete.
+        This method should be overridden by subclasses to implement specific behavior; that's why the underscore.
+        :param db: The database connection where the marking of the habit will be stored
+        :param mark_date: The date on which to mark the habit as complete
+        """
+        raise NotImplementedError("Subclasses must override _mark_complete_specific method.")
 
     def calc_individual_stats(self):
         """
@@ -293,14 +305,12 @@ class DailyHabit(Habit):
     def __init__(self, name="", descr="", gen_date=date.today()):
         super().__init__(name, descr, gen_date, periodicity="Daily")
 
-    def mark_complete(self, db, mark_date=None):
+    def _mark_complete_specific(self, db, mark_date):
         """
-        Marks the habit as complete on a specific date.
-        :param db: The database connection where the marking of the habit will be stores
-        :param mark_date: the date on which to mark the habit as complete
+        Helps marking the daily habit as complete on a specific date.
+        :param db: The database connection where the marking of the habit will be stored
+        :param mark_date: The date on which to mark the habit as complete
         """
-        if mark_date is None:
-            mark_date = date.today()
         self.marked_complete.append(mark_date)
         if mark_date != date.today() and mark_date < self.gen_date:
             self.gen_date = mark_date
@@ -405,14 +415,12 @@ class WeeklyHabit(Habit):
     def __init__(self, name="", descr="", gen_date=date.today()):
         super().__init__(name, descr, gen_date, periodicity="Weekly")
 
-    def mark_complete(self, db, mark_date=None):
+    def _mark_complete_specific(self, db, mark_date=None):
         """
-        Marks the habit as complete for the specific week.
+        Helps marking the habit as complete for the specific week.
         :param db: The database connection where the marking of the habit will be stores
         :param mark_date: the date on which to mark the habit as complete
         """
-        if mark_date is None:
-            mark_date = date.today()
         # For marking weekly habits complete, we anchor the completion to the first day of the period
         week_start = mark_date - timedelta(days=mark_date.weekday())
         if week_start not in self.marked_complete:
@@ -530,14 +538,12 @@ class MonthlyHabit(Habit):
     def __init__(self, name="", descr="", gen_date=date.today()):
         super().__init__(name, descr, gen_date, periodicity="Monthly")
 
-    def mark_complete(self, db, mark_date=None):
+    def _mark_complete_specific(self, db, mark_date=None):
         """
-        Marks the habit as complete for the month.
+        Helps marking the habit as complete for the month.
         :param db: The database connection where the marking of the habit will be stores
         :param mark_date: the date on which to mark the habit as complete
         """
-        if mark_date is None:
-            mark_date = date.today()
         # For marking monthly habits complete, we anchor the completion to the first day of the month.
         month_start = (mark_date.replace(day=1))
         if month_start not in self.marked_complete:
