@@ -150,6 +150,7 @@ def clear_check_off_dates(db: sqlite3.Connection):
     cur = db.cursor()
     try:
         # Updating all check_off_dates to an empty list
+        # noinspection SqlWithoutWhere
         cur.execute("UPDATE habit SET check_off_dates=?;", (json.dumps([]),))
         db.commit()
         print("Check-off dates cleared successfully.")
@@ -168,6 +169,7 @@ def clear_database(db: sqlite3.Connection):
     cur = db.cursor()
     try:
         # Updating all habit data to an empty list
+        # noinspection SqlWithoutWhere
         cur.execute("DELETE from habit")
         db.commit()
         print("Data cleared successfully.")

@@ -14,7 +14,7 @@ def test_current_date():
     assert date.today() == date.fromisoformat(fake_today)
 
 
-class TestDB:
+class TestHabit:
     def __init__(self):
         self.test_db = None
 
