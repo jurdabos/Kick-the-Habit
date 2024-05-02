@@ -6,7 +6,7 @@ from dataschema import add_habit_to_db, increment_guilt
 from tabulate import tabulate
 import math
 from dateutil.relativedelta import relativedelta
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import json
 from typing import Union
 
@@ -96,8 +96,9 @@ class Habit:
         """
         if mark_date is None:
             mark_date = date.today()
-        # Calling the subclass-specific part of the logic
-        self._mark_complete_specific(db, mark_date)
+        # Calling the subclass-specific part of the logic and returning the updated mark_date
+        mark_date = self._mark_complete_specific(db, mark_date)
+        return mark_date
 
     def _mark_complete_specific(self, db, mark_date):
         """
@@ -316,6 +317,7 @@ class DailyHabit(Habit):
             self.gen_date = mark_date
         self.update_gen_date(db, self.gen_date)
         self.marked_complete.sort()
+        return mark_date
 
     def calculate_current_streak(self):
         """
@@ -415,20 +417,21 @@ class WeeklyHabit(Habit):
     def __init__(self, name="", descr="", gen_date=date.today()):
         super().__init__(name, descr, gen_date, periodicity="Weekly")
 
-    def _mark_complete_specific(self, db, mark_date=None):
+    def _mark_complete_specific(self, db, mark_date):
         """
         Helps marking the habit as complete for the specific week.
         :param db: The database connection where the marking of the habit will be stores
         :param mark_date: the date on which to mark the habit as complete
         """
         # For marking weekly habits complete, we anchor the completion to the first day of the period
-        week_start = mark_date - timedelta(days=mark_date.weekday())
-        if week_start not in self.marked_complete:
-            self.marked_complete.append(week_start)
+        mark_date = mark_date - timedelta(days=mark_date.weekday())
+        if mark_date not in self.marked_complete:
+            self.marked_complete.append(mark_date)
         if mark_date != date.today() and mark_date < self.gen_date:
             self.gen_date = mark_date
         self.update_gen_date(db, self.gen_date)
         self.marked_complete.sort()
+        return mark_date
 
     def calculate_current_streak(self):
         """
@@ -538,20 +541,21 @@ class MonthlyHabit(Habit):
     def __init__(self, name="", descr="", gen_date=date.today()):
         super().__init__(name, descr, gen_date, periodicity="Monthly")
 
-    def _mark_complete_specific(self, db, mark_date=None):
+    def _mark_complete_specific(self, db, mark_date):
         """
         Helps marking the habit as complete for the month.
         :param db: The database connection where the marking of the habit will be stores
         :param mark_date: the date on which to mark the habit as complete
         """
         # For marking monthly habits complete, we anchor the completion to the first day of the month.
-        month_start = (mark_date.replace(day=1))
-        if month_start not in self.marked_complete:
-            self.marked_complete.append(month_start)
+        mark_date = mark_date.replace(day=1)
+        if mark_date not in self.marked_complete:
+            self.marked_complete.append(mark_date)
         self.marked_complete.sort()
         if mark_date != date.today() and mark_date < self.gen_date:
             self.gen_date = mark_date
         self.update_gen_date(db, self.gen_date)
+        return mark_date
 
     def calculate_current_streak(self):
         """
@@ -573,7 +577,9 @@ class MonthlyHabit(Habit):
             ):
                 current_streak += 1
                 # Subtracting 1 month from the datetime object held by the variable current_month_start
-                current_month_start -= timedelta(days=current_month_start.day)
+                current_month_start -= relativedelta(months=1)
+                # Setting the day to 1 to double-ensure it's the start of the month
+                current_month_start = current_month_start.replace(day=1)
         current_streak = int(current_streak)
         return current_streak
 

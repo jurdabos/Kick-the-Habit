@@ -61,16 +61,18 @@ def ensure_unique_checkoff_dates(db, habit):
     try:
         # Retrieving the current check_off_dates for the habit
         cur.execute("SELECT check_off_dates FROM habit WHERE name=?;", (habit.name,))
-        check_off_dates_str = cur.fetchone()[0]
-        # Deserializing the current check_off_dates
-        check_off_dates = json.loads(check_off_dates_str) if check_off_dates_str else []
-        # Ensuring uniqueness of check-off dates
-        unique_dates = list(set(check_off_dates))
-        if len(unique_dates) != len(check_off_dates):
-            # Updating the check_off_dates column in the habit table if duplicates found
-            cur.execute("UPDATE habit SET check_off_dates=? WHERE name=?;", (json.dumps(unique_dates), habit.name))
-            db.commit()
-            print(f"Removed duplicate check-off dates for habit '{habit.name}'.")
+        result = cur.fetchone()
+        if result:
+            check_off_dates_str = result[0]
+            # Deserializing the current check_off_dates
+            check_off_dates = json.loads(check_off_dates_str) if check_off_dates_str else []
+            # Ensuring uniqueness of check-off dates
+            unique_dates = list(set(check_off_dates))
+            if len(unique_dates) != len(check_off_dates):
+                # Updating the check_off_dates column in the habit table if duplicates found
+                cur.execute("UPDATE habit SET check_off_dates=? WHERE name=?;", (json.dumps(unique_dates), habit.name))
+                db.commit()
+                print(f"Removed duplicate check-off dates for habit '{habit.name}'.")
     except Exception as e:
         # Logging the exception
         print(f"Error ensuring uniqueness of check-off dates: {e}")
@@ -197,12 +199,11 @@ def cli():
                             "Do you want to mark this habit done for today?", choices=[
                                 "Yes", "No"]).ask()
                         if is_today_mark == "Yes":
-                            habit_to_view.mark_complete(db)
-                            mark_date = date.today()
+                            mark_date = habit_to_view.mark_complete(db)
                         else:
                             print("Please enter the date when you want to mark the habit done.")
                             mark_date = get_date_from_user()
-                            habit_to_view.mark_complete(db, mark_date)
+                            mark_date = habit_to_view.mark_complete(db, mark_date)
                         habit_to_view.add_event(db, mark_date)
                         db.commit()
                         print(f"Habit '{habit_name_to_view}' has been sadly marked done.")

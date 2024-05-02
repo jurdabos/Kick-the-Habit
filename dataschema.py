@@ -92,8 +92,8 @@ def increment_guilt(db: sqlite3.Connection, name: str, event_date=None):
             cur.execute("UPDATE habit SET check_off_dates=? WHERE name=?;", (json.dumps(check_off_dates), name))
             db.commit()
         else:
-            print(f"The date {event_date} has been already marked for habit {name}. Skipping insertion.")
-
+            # print(f"The date {event_date} has been already marked for habit {name}. Skipping insertion.")
+            pass
     except Exception as e:
         # Logging the exception
         print(f"Error updating check_off_dates: {e}")
@@ -138,5 +138,41 @@ def get_habit_data(db_conn_obj_schema_ghb: sqlite3.Connection, name: Optional[st
         print(f"Error executing SQL query: {e}")
         return None
 
+    finally:
+        cur.close()
+
+
+def clear_check_off_dates(db: sqlite3.Connection):
+    """
+    Clears all check-off dates for habits in the database.
+    :param db: An SQLite database connection object
+    """
+    cur = db.cursor()
+    try:
+        # Updating all check_off_dates to an empty list
+        cur.execute("UPDATE habit SET check_off_dates=?;", (json.dumps([]),))
+        db.commit()
+        print("Check-off dates cleared successfully.")
+    except sqlite3.Error as e:
+        # Logging the exception
+        print(f"Error clearing check-off dates: {e}")
+    finally:
+        cur.close()
+
+
+def clear_database(db: sqlite3.Connection):
+    """
+    Clears all data for habits in the database.
+    :param db: An SQLite database connection object
+    """
+    cur = db.cursor()
+    try:
+        # Updating all habit data to an empty list
+        cur.execute("DELETE from habit")
+        db.commit()
+        print("Data cleared successfully.")
+    except sqlite3.Error as e:
+        # Logging the exception
+        print(f"Error clearing data: {e}")
     finally:
         cur.close()
