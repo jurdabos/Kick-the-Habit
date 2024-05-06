@@ -31,11 +31,8 @@ python main.py
 and choose from the menu options.
 
 ## Tests
-Navigate to the project library, then run the test script.
+Navigate to the project library, then run the test script with the following command.
 ```shell
-pytest .
+python test_dataframe.py
 ```
-This launches all the tests implemented for the project.
-The test setup is created in test_project.py, while the files test_dataframe.py, test_dataschema.py and test_habit.py hold test functions for some of the functionalities of the program.
-The test fixture in test_project.py sets up a data table in test.db with 5 pre-defined habits and their test data.
-Please note that at the end of each test, the test database is cleared, so if you just query straight into the test.db file, you will only see the skeleton of the table.
+This launches all the tests implemented for the project, both for the analytics module, both for the database connection.

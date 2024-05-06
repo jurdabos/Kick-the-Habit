@@ -1,4 +1,4 @@
-from test_project import setup_test_database
+from project_setup import setup_test_database
 from freezegun import freeze_time
 from datetime import date
 import pytest
@@ -13,8 +13,6 @@ def test_current_date():
 
 
 class TestDB:
-    def __init__(self):
-        self.test_db = None
 
     def setup_method(self):
         self.test_db = setup_test_database()

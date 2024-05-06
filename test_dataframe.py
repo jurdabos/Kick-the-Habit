@@ -1,4 +1,4 @@
-from test_project import setup_test_database
+from project_setup import setup_test_database
 from freezegun import freeze_time
 from datetime import date
 import pytest
