@@ -7,7 +7,7 @@ Kick the Habit is a habit-tracking app tailored to tracking and kicking our bad 
 It is a pure Python project developed in Pycharm.
 Launch it by navigating to the project folder and typing python main.py, then use the arrow keys to select menu items.
 First, create a habit under the menu item 'Create new habit'.
-After this, you will be able to mark the habit completed and see individual stats related to it under menu item 'My habits'. You can delete habits you are not interested in anymore in menu item no. 4 'Delete habit'. If you choose '2. View data', you will be able to see extra aggregate stats pertaining to all habits currently stats.
+After this, you will be able to mark the habit completed and see individual stats related to it under menu item 'My habits'. You can delete habits you are not interested in anymore in menu item no. 4 'Delete habit'. If you choose '2. View data', you will be able to see extra aggregate stats pertaining to all habits currently tracked.
 
 ## The basic building blocks
 
@@ -35,4 +35,4 @@ Navigate to the project library, then run the test script with the following com
 ```shell
 python test_dataframe.py
 ```
-This launches all the tests implemented for the project, both for the analytics module, both for the database connection.
+This launches all the tests implemented for the project, both for the analytics module and for the database connection.
